@@ -33,9 +33,7 @@ pub struct CreateVestingAccount<'info> {
         bump,
     )]
     pub vesting_account: Account<'info, VestingAccount>,
-
     pub mint: InterfaceAccount<'info, Mint>,
-
     #[account(
         init,
         token::mint = mint,
