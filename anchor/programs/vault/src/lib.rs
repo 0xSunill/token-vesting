@@ -27,11 +27,27 @@ pub mod vesting {
         Ok(())
     }
 
+    pub fn create_employee_account(
+        ctx: Context<CreateEmployeeAccount>,
+        start_time: i64,
+        end_time: i64,
+        total_amount: u64,
+        cliff_time: i64,
+    ) -> Result<()> {
+        *ctx.accounts.employee_account = EmployeeAccount {
+            benificiary: ctx.accounts.beneficiary.key(),
+            start_time,
+            end_time,
+            cliff_time,
+            vesting_account: ctx.accounts.vesting_account.key(),
+            total_amount,
+            total_claimed: 0,
+            bump: ctx.bumps.employee_account,
+        };
 
+        Ok(())
+    }
 
-
-    
-}
 
 #[derive(Accounts)]
 #[instruction(company_name:String)]
@@ -104,5 +120,6 @@ pub struct EmployeeAccount {
     pub cliff_time: i64, //time how much an employee has to wait before claming
     pub vesting_account: Pubkey,
     pub total_amount: u64,
-    pub total_claimed: bool,
+    pub total_claimed: u64,
+    pub bump: u8,
 }
