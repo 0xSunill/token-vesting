@@ -24,9 +24,13 @@ pub mod vesting {
             treasury_bump: ctx.bumps.treasury_token_account,
             bump: ctx.bumps.vesting_account,
         };
-
         Ok(())
     }
+
+
+
+
+    
 }
 
 #[derive(Accounts)]
@@ -56,6 +60,29 @@ pub struct CreateVestingAccount<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+pub struct CreateEmployeeAccount<'info> {
+    #[account(mut)]
+    pub owner: Signer<'info>,
+    pub beneficiary: SystemAccount<'info>,
+
+    #[account(
+        has_one = owner
+    )]
+    pub vesting_account: Account<'info, VestingAccount>,
+
+    #[account(
+    init,
+    space = 8+ EmployeeAccount::INIT_SPACE,
+    payer = owner,
+    seeds = [b"employee_vesting", beneficiary.key().as_ref(),vesting_account.key().as_ref()],
+    bump,
+    )]
+    pub employee_account: Account<'info, EmployeeAccount>,
+
+    pub system_program: Program<'info, System>,
+}
+
 #[account]
 #[derive(InitSpace)]
 pub struct VestingAccount {
@@ -66,4 +93,16 @@ pub struct VestingAccount {
     pub company_name: String,
     pub treasury_bump: u8,
     pub bump: u8,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct EmployeeAccount {
+    pub benificiary: Pubkey,
+    pub start_time: i64,
+    pub end_time: i64,
+    pub cliff_time: i64, //time how much an employee has to wait before claming
+    pub vesting_account: Pubkey,
+    pub total_amount: u64,
+    pub total_claimed: bool,
 }
