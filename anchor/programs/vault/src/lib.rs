@@ -47,7 +47,7 @@ pub mod vesting {
 
         Ok(())
     }
-
+}
 
 #[derive(Accounts)]
 #[instruction(company_name:String)]
