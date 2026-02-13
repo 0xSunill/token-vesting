@@ -17,7 +17,7 @@ pub mod vesting {
         amount: u64,
     ) -> Result<()> {
         *ctx.accounts.vesting_account = VestingAccount {
-            owner: ctx.accounts.signer.key(),
+      owner: ctx.accounts.signer.key(),
             mint: ctx.accounts.mint.key(),
             treasury_account: ctx.accounts.treasury_token_account.key(),
             company_name: company_name,
@@ -44,6 +44,7 @@ pub mod vesting {
             total_claimed: 0,
             bump: ctx.bumps.employee_account,
         };
+        
 
         Ok(())
     }
