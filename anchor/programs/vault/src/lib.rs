@@ -48,7 +48,6 @@ pub mod vesting {
         Ok(())
     }
 }
-
 #[derive(Accounts)]
 #[instruction(company_name:String)]
 pub struct CreateVestingAccount<'info> {
@@ -59,7 +58,7 @@ pub struct CreateVestingAccount<'info> {
         payer = signer,
         space = 8 + VestingAccount::INIT_SPACE,
         seeds = [company_name.as_ref()],
-        bump,
+        bump, 
     )]
     pub vesting_account: Account<'info, VestingAccount>,
     pub mint: InterfaceAccount<'info, Mint>,
