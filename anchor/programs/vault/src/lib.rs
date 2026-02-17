@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
+use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface};
 
 #[cfg(test)]
@@ -35,7 +36,7 @@ pub mod vesting {
         cliff_time: i64,
     ) -> Result<()> {
         *ctx.accounts.employee_account = EmployeeAccount {
-            benificiary: ctx.accounts.beneficiary.key(),
+            beneficiary: ctx.accounts.beneficiary.key(),
             start_time,
             end_time,
             cliff_time,
@@ -48,17 +49,9 @@ pub mod vesting {
         Ok(())
     }
 
-
- pub fn claim_tokens(
-        ctx: Context<ClaimTokens>,
-        company_name: String,
-    ) -> Result<()> {
-       
-        };
-
+    pub fn claim_tokens(ctx: Context<ClaimTokens>, company_name: String) -> Result<()> {
         Ok(())
     }
-
 }
 #[derive(Accounts)]
 #[instruction(company_name:String)]
@@ -70,7 +63,7 @@ pub struct CreateVestingAccount<'info> {
         payer = signer,
         space = 8 + VestingAccount::INIT_SPACE,
         seeds = [company_name.as_ref()],
-        bump, 
+        bump
     )]
     pub vesting_account: Account<'info, VestingAccount>,
     pub mint: InterfaceAccount<'info, Mint>,
@@ -83,7 +76,7 @@ pub struct CreateVestingAccount<'info> {
         bump
     )]
     pub treasury_token_account: InterfaceAccount<'info, TokenAccount>,
-    pub token_program: Program<'info, TokenInterface>,
+    pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
 
@@ -116,7 +109,7 @@ pub struct ClaimTokens<'info> {
     #[account(mut)]
     pub beneficiary: Signer<'info>,
     #[account(
-        mut
+        mut,
         has_one = beneficiary,
         has_one = vesting_account,
          seeds = [b"employee_vesting", beneficiary.key().as_ref(),vesting_account.key().as_ref()],
@@ -126,7 +119,7 @@ pub struct ClaimTokens<'info> {
 
     #[account(
         mut,
-        has_one = treasury_token_account,
+        has_one = treasury_account,
         has_one = mint,
         seeds = [b"vesting_treasury", company_name.as_bytes()],
         bump = vesting_account.bump,
@@ -136,28 +129,22 @@ pub struct ClaimTokens<'info> {
     pub mint: InterfaceAccount<'info, Mint>,
 
     #[account(mut)]
-    pub treasury_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub treasury_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
-        init_if_needed, 
+        init_if_needed,
         payer = beneficiary,
-        associated_token::mint = mint, 
+        associated_token::mint = mint,
         associated_token::authority = beneficiary,
         associated_token::token_program = token_program,
     )]
-   pub employee_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub employee_token_account: InterfaceAccount<'info, TokenAccount>,
 
-    
     pub token_program: Interface<'info, TokenInterface>,
     pub associated_token_program: Program<'info, AssociatedToken>,
 
     pub system_program: Program<'info, System>,
 }
-    
-
-
-
-
 
 #[account]
 #[derive(InitSpace)]
@@ -174,7 +161,7 @@ pub struct VestingAccount {
 #[account]
 #[derive(InitSpace)]
 pub struct EmployeeAccount {
-    pub benificiary: Pubkey,
+    pub beneficiary: Pubkey,
     pub start_time: i64,
     pub end_time: i64,
     pub cliff_time: i64, //time how much an employee has to wait before claming
