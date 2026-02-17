@@ -134,7 +134,8 @@ pub struct ClaimTokens<'info> {
     pub vesting_account: Account<'info, VestingAccount>,
 
     pub mint: InterfaceAccount<'info, Mint>,
-    #[account( mut)]
+
+    #[account(mut)]
     pub treasury_token_account: InterfaceAccount<'info, TokenAccount>,
 
     #[account(
@@ -148,7 +149,7 @@ pub struct ClaimTokens<'info> {
 
     
     pub token_program: Interface<'info, TokenInterface>,
-pub associated_token_program: Program<'info, AssociatedToken>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
 
     pub system_program: Program<'info, System>,
 }
