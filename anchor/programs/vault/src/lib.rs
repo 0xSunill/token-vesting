@@ -50,6 +50,19 @@ pub mod vesting {
     }
 
     pub fn claim_tokens(ctx: Context<ClaimTokens>, company_name: String) -> Result<()> {
+        let employee_account = &mut ctx.accounts.employee_account;
+        let current_time = Clock::get()?.unix_timestamp;
+
+        if current_time < employee_account.cliff_time {
+            return Err(ErrorCode::ClaimNotAvailable.into());
+        }   
+
+        if current_time > employee_account.end_time {
+            return Err(ErrorCode::VestingPeriodEnded.into());
+        }
+
+        let total_claimable = 
+
         Ok(())
     }
 }
@@ -169,4 +182,13 @@ pub struct EmployeeAccount {
     pub total_amount: u64,
     pub total_claimed: u64,
     pub bump: u8,
+}
+
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Claim not available")]
+    ClaimNotAvailable,
+    #[msg("Vesting period ended")]
+    VestingPeriodEnded,
 }
