@@ -57,11 +57,27 @@ pub mod vesting {
             return Err(ErrorCode::ClaimNotAvailable.into());
         }   
 
-        if current_time > employee_account.end_time {
-            return Err(ErrorCode::VestingPeriodEnded.into());
+        // if current_time > employee_account.end_time {
+        //     return Err(ErrorCode::VestingPeriodEnded.into());
+        // }
+
+        let time_since_start = current_time.saturating_sub(employee_account.start_time);
+        let total_vesting_period = employee_account.end_time.saturating_sub(employee_account.start_time);
+
+        if total_vesting_period == 0 {
+            return Err(ErrorCode::InvalidVestingPeriod.into());
         }
 
-        let total_claimable = 
+        let vested_amount = if current_time >= employee_account.end_time {
+            employee_account.total_amount
+        } else {
+            match employee_account.total_amount.checked_mul(time_since_start as u64) {
+                Some(amount) => amount / total_vesting_period as u64,
+                None => {
+                    return Err(ErrorCode::OverflowError.into());
+                }
+            }
+        }
 
         Ok(())
     }
@@ -154,6 +170,7 @@ pub struct ClaimTokens<'info> {
     pub employee_token_account: InterfaceAccount<'info, TokenAccount>,
 
     pub token_program: Interface<'info, TokenInterface>,
+
     pub associated_token_program: Program<'info, AssociatedToken>,
 
     pub system_program: Program<'info, System>,
@@ -191,4 +208,8 @@ pub enum ErrorCode {
     ClaimNotAvailable,
     #[msg("Vesting period ended")]
     VestingPeriodEnded,
+    #[msg("Invalid vesting period")]
+    InvalidVestingPeriod,
+    #[msg("Overflow error")]
+    OverflowError,
 }
