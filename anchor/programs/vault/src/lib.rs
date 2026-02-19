@@ -57,9 +57,7 @@ pub mod vesting {
             return Err(ErrorCode::ClaimNotAvailable.into());
         }   
 
-        // if current_time > employee_account.end_time {
-        //     return Err(ErrorCode::VestingPeriodEnded.into());
-        // }
+
 
         let time_since_start = current_time.saturating_sub(employee_account.start_time);
         let total_vesting_period = employee_account.end_time.saturating_sub(employee_account.start_time);
@@ -181,7 +179,7 @@ pub struct ClaimTokens<'info> {
         mut,
         has_one = treasury_account,
         has_one = mint,
-        seeds = [b"vesting_treasury", company_name.as_bytes()],
+        seeds = [company_name.as_ref()],
         bump = vesting_account.bump,
         )]
     pub vesting_account: Account<'info, VestingAccount>,
