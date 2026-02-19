@@ -79,6 +79,12 @@ pub mod vesting {
             }
         }
 
+        let amount_to_claim = vested_amount.saturating_sub(employee_account.total_claimed);
+
+        if amount_to_claim == 0 {
+            return Err(ErrorCode::NoTokensToClaim.into());
+        }
+        
         Ok(())
     }
 }
@@ -212,4 +218,6 @@ pub enum ErrorCode {
     InvalidVestingPeriod,
     #[msg("Overflow error")]
     OverflowError,
+    #[msg("No tokens to claim")]
+    NoTokensToClaim,
 }
