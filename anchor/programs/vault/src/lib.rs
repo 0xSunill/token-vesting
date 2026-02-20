@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, TransferChecked};
 
@@ -49,7 +48,7 @@ pub mod vesting {
         Ok(())
     }
 
-    pub fn claim_tokens(ctx: Context<ClaimTokens>, company_name: String) -> Result<()> {
+    pub fn claim_tokens(ctx: Context<ClaimTokens>, _company_name: String) -> Result<()> {
         let employee_account = &mut ctx.accounts.employee_account;
         let current_time = Clock::get()?.unix_timestamp;
 
