@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token_interface::{Mint, TokenAccount, TokenInterface, TransferChecked};
+use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface, TransferChecked};
 
 #[cfg(test)]
 mod tests;
@@ -55,12 +55,12 @@ pub mod vesting {
 
         if current_time < employee_account.cliff_time {
             return Err(ErrorCode::ClaimNotAvailable.into());
-        }   
-
-
+        }
 
         let time_since_start = current_time.saturating_sub(employee_account.start_time);
-        let total_vesting_period = employee_account.end_time.saturating_sub(employee_account.start_time);
+        let total_vesting_period = employee_account
+            .end_time
+            .saturating_sub(employee_account.start_time);
 
         if total_vesting_period == 0 {
             return Err(ErrorCode::InvalidVestingPeriod.into());
@@ -69,13 +69,16 @@ pub mod vesting {
         let vested_amount = if current_time >= employee_account.end_time {
             employee_account.total_amount
         } else {
-            match employee_account.total_amount.checked_mul(time_since_start as u64) {
+            match employee_account
+                .total_amount
+                .checked_mul(time_since_start as u64)
+            {
                 Some(amount) => amount / total_vesting_period as u64,
                 None => {
                     return Err(ErrorCode::OverflowError.into());
                 }
             }
-        }
+        };
 
         let amount_to_claim = vested_amount.saturating_sub(employee_account.total_claimed);
 
@@ -83,28 +86,26 @@ pub mod vesting {
             return Err(ErrorCode::NoTokensToClaim.into());
         }
 
-
         //  cpi call to trasfer tokens from the vesting account to the employee account
         let cpi_accounts = TransferChecked {
-            from: ctx.accounts.treasury_token_account.to_account_info(),
+            from: ctx.accounts.treasury_account.to_account_info(),
             mint: ctx.accounts.mint.to_account_info(),
             to: ctx.accounts.employee_token_account.to_account_info(),
-            authority: ctx.accounts.treasury_token_account.to_account_info(),
+            authority: ctx.accounts.treasury_account.to_account_info(),
         };
 
         let cpi_program = ctx.accounts.token_program.to_account_info();
 
         let seeds = &[
             b"vesting_treasury",
-            ctx.accounts.vesting_account.company_name.as_ref(),
+            ctx.accounts.vesting_account.company_name.as_bytes(),
             &[ctx.accounts.vesting_account.treasury_bump],
         ];
         let signer = &[&seeds[..]];
 
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer);
         let decimals = ctx.accounts.mint.decimals;
-        token_interface::transfer_checked(cpi_ctx, amount_to_claim as u64 , decimals)?;
-
+        token_interface::transfer_checked(cpi_ctx, amount_to_claim as u64, decimals)?;
 
         employee_account.total_claimed += amount_to_claim;
 
@@ -229,7 +230,6 @@ pub struct EmployeeAccount {
     pub total_claimed: u64,
     pub bump: u8,
 }
-
 
 #[error_code]
 pub enum ErrorCode {

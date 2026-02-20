@@ -22,4 +22,4 @@ anchor-spl = "0.32.1"
 
 [dev-dependencies]
 
-solana-sdk = "1.18"
+solana-sdk = "2.2.1"
