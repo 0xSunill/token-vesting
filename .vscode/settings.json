@@ -1,6 +1,5 @@
 {
     "workbench.colorTheme": "Bearded Theme feat. Will",
-    "files.autoSave": "off",
     "[javascript]": {
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
@@ -28,7 +27,9 @@
     "workbench.productIconTheme": "a-file-icon-vscode-product-icon-theme",
     "workbench.iconTheme": "material-icon-theme",
     "diffEditor.ignoreTrimWhitespace": false,
+    "editor.formatOnSave": true,
     "[rust]": {
-        "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+        "editor.formatOnSave": true
     }
 }

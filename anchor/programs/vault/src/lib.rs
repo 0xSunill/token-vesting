@@ -14,7 +14,7 @@ pub mod vesting {
     pub fn create_vesting_account(
         ctx: Context<CreateVestingAccount>,
         company_name: String,
-        amount: u64,
+        // amount: u64,
     ) -> Result<()> {
         *ctx.accounts.vesting_account = VestingAccount {
             owner: ctx.accounts.signer.key(),
@@ -24,6 +24,7 @@ pub mod vesting {
             treasury_bump: ctx.bumps.treasury_token_account,
             bump: ctx.bumps.vesting_account,
         };
+
         Ok(())
     }
 
